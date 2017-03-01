@@ -31,14 +31,19 @@ Vue.component('codix-toolbar', {
 <transition name="slide-fade">
 <div v-if="show" class='header codixHeader'>
     <div class='container' style='text-align: right'>
-        <codix-rating-box :name="'Usability'" :value="repo.avgUsability"/>
-        <codix-rating-box :name="'Functionality'" :value="repo.avgFunctionality"/>
-        <codix-rating-box :name="'Stability'" :value="repo.avgStability"/>
-        <codix-rating-box :name="'Performance'" :value="repo.avgPerformance"/>
-        <codix-rating-box :name="'Support'" :value="repo.avgSupport"/>
-        <codix-rating-box :name="'Overall'" :value="repo.overallRating"/>
+        <span v-if="repo.overallRating > 0">
+            <codix-rating-box :name="'Usability'" :value="repo.avgUsability"/>
+            <codix-rating-box :name="'Functionality'" :value="repo.avgFunctionality"/>
+            <codix-rating-box :name="'Stability'" :value="repo.avgStability"/>
+            <codix-rating-box :name="'Performance'" :value="repo.avgPerformance"/>
+            <codix-rating-box :name="'Support'" :value="repo.avgSupport"/>
+            <codix-rating-box :name="'Overall'" :value="repo.overallRating"/>
+        </span>
+        <span v-else>
+            Be the first to rate {{repo.name}} 
+        </span>
         <!--<button class='rateButton'  style="vertical-align: bottom;" v-on:click="rateClicked"><img class="codixImgIcon" v-bind:src="codixImg"/> Rate {{repo.name}}</button>        -->
-        <button class='rateButton'  style="vertical-align: bottom;" v-on:click="rateClicked">Rate on Condix</button>
+        <button class='rateButton'  style="vertical-align: bottom;" v-on:click="rateClicked">Rate on Codix</button>
     </div>
 </div>
 </transition>`,
