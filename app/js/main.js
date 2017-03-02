@@ -1,3 +1,11 @@
+// set to true to enable localhost communication (for testing)
+// will also need to add a localhost permission to manifest.json:
+// "https://localhost:8443/*"
+var isDevMode = false;
+var codixDomain = isDevMode ? "https://localhost:8443" : "https://codix.io";
+var thisRepoName = undefined;
+var thisOwnerName = undefined;
+
 Vue.component('codix-rating-box', {
     template: `
 <span style="padding-right: 12px;">
@@ -39,28 +47,22 @@ Vue.component('codix-toolbar', {
             <codix-rating-box :name="'Support'" :value="repo.avgSupport"/>
             <codix-rating-box :name="'Overall'" :value="repo.overallRating"/>
         </span>
-        <span v-else>
-            Be the first to rate {{repo.name}} 
-        </span>
-        <!--<button class='rateButton'  style="vertical-align: bottom;" v-on:click="rateClicked"><img class="codixImgIcon" v-bind:src="codixImg"/> Rate {{repo.name}}</button>        -->
-        <button class='rateButton'  style="vertical-align: bottom;" v-on:click="rateClicked">Rate on Codix</button>
+        <span v-else style="padding-right: 12px; color: lightyellow;">
+            Be the first to rate {{repo.name}}! 
+        </span>  
+        <button class='codixButton similarButton' style="margin-right: 12px;" v-if="repo.similarRepos.length > 0" v-on:click="similarClicked">{{repo.similarRepos.length}} Similar</button>
+        <button class='codixButton rateButton'  style="vertical-align: bottom;" v-on:click="rateClicked">Rate</button>
     </div>
 </div>
 </transition>`,
     props: ['repo', 'show'],
     methods: {
         rateClicked: function() {
-            var destUri = "https://codix.io/gh/repo/" + thisOwnerName + "/" + thisRepoName;
+            gotoUri(this.repo.codixUri + "?ref=plugin")
+        },
 
-            // try to open in a new tab:
-            var win = window.open(destUri, '_blank');
-            if (win) {
-                //Browser has allowed it to be opened:
-                win.focus();
-            } else {
-                //Browser has blocked us so navigate directly:
-                window.location.href = destUri;
-            }
+        similarClicked: function() {
+            gotoUri(this.repo.compareSimilarUri)
         }
     },
     computed: {
@@ -70,8 +72,17 @@ Vue.component('codix-toolbar', {
     }
 });
 
-var thisRepoName = undefined;
-var thisOwnerName = undefined;
+function gotoUri(destUri) {
+    // try to open in a new tab:
+    var win = window.open(destUri, '_blank');
+    if (win) {
+        //Browser has allowed it to be opened:
+        win.focus();
+    } else {
+        //Browser has blocked us so navigate directly:
+        window.location.href = destUri;
+    }
+}
 
 function initCodix() {
     // TODO: need a better way to detect and avoid 404's.  This wont work
@@ -82,10 +93,9 @@ function initCodix() {
     var thisPageUri = $(location).attr('href');
     var result = thisPageUri.match(/^https:\/\/github.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)$/);
     if (!is404 && result.length == 3) {
-        var domain = "https://codix.io"; // TODO: use prod domain
         thisOwnerName = result[1];
         thisRepoName = result[2];
-        var codixUri = domain + "/gh/repo/" + thisOwnerName + "/" + thisRepoName;
+        var codixUri = codixDomain + "/gh/repo/" + thisOwnerName + "/" + thisRepoName;
         $.ajax({
             url: codixUri + "?format=json"
         }).then(function (data) {
