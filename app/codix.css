@@ -105,6 +105,14 @@
     border: 1px solid green;
 }
 
+.scoreElementNormal {
+
+}
+
+.scoreElementHighlighted {
+   font-weight: bolder;
+}
+
 .bounce-enter-active {
     animation: bounce-in .5s;
 }
