@@ -8,13 +8,13 @@ var thisOwnerName = undefined;
 
 Vue.component('codix-rating-box', {
     template: `
-<span style="padding-right: 12px;">
+<span v-bind:class="scoreElementClass" style="padding-right: 12px;">
     <span class="scoreBoxLabel">{{name}}:</span>
     <div class="scoreBox" v-bind:class="scoreClass">
         {{value > 0 ? value.toFixed(1) : '-'}}
     </div>    
 </span>`,
-    props: ['name', 'value'],
+    props: ['name', 'value', 'isHighlighted'],
     computed: {
         scoreClass: function() {
             if(this.value == 5) {
@@ -30,6 +30,9 @@ Vue.component('codix-rating-box', {
             } else {
                 return 'noStars';
             }
+        },
+        scoreElementClass : function() {
+            return this.isHighlighted ? "scoreElementHighlighted" : "scoreElementNormal";
         }
     }
 });
@@ -45,7 +48,7 @@ Vue.component('codix-toolbar', {
             <codix-rating-box :name="'Stability'" :value="repo.avgStability"/>
             <codix-rating-box :name="'Performance'" :value="repo.avgPerformance"/>
             <codix-rating-box :name="'Support'" :value="repo.avgSupport"/>
-            <codix-rating-box :name="'Overall'" :value="repo.overallRating"/>
+            <codix-rating-box :name="'Overall'" :value="repo.overallRating" :isHighlighted="true"/>
         </span>
         <span v-else style="padding-right: 12px; color: lightyellow;">
             Be the first to rate {{repo.name}}! 
@@ -91,8 +94,8 @@ function initCodix() {
     var pageTitle = $(document).find("title").text();
     var is404 = pageTitle === notFoundTitle;
     var thisPageUri = $(location).attr('href');
-    var result = thisPageUri.match(/^https:\/\/github.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)$/);
-    if (!is404 && result.length == 3) {
+    var result = thisPageUri.match(/^https:\/\/github.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)\/?$/);
+    if (!is404 && result && result.length == 3) {
         thisOwnerName = result[1];
         thisRepoName = result[2];
         var codixUri = codixDomain + "/gh/repo/" + thisOwnerName + "/" + thisRepoName;
@@ -107,6 +110,10 @@ function initCodix() {
             }
         });
     }
+}
+
+function onTabChanged() {
+
 }
 
 // startup!
